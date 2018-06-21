@@ -1,0 +1,348 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		F0D381DE20DA46E200DFACBF /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F0D381DD20DA46E200DFACBF /* AppDelegate.m */; };
+		F0D381E120DA46E200DFACBF /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F0D381E020DA46E200DFACBF /* ViewController.m */; };
+		F0D381E420DA46E200DFACBF /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F0D381E220DA46E200DFACBF /* Main.storyboard */; };
+		F0D381E620DA46F100DFACBF /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F0D381E520DA46F100DFACBF /* Assets.xcassets */; };
+		F0D381E920DA46F100DFACBF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F0D381E720DA46F100DFACBF /* LaunchScreen.storyboard */; };
+		F0D381EC20DA46F100DFACBF /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F0D381EB20DA46F100DFACBF /* main.m */; };
+		F0D381F420DA4E4600DFACBF /* ESCSaveToH264FileTool.m in Sources */ = {isa = PBXBuildFile; fileRef = F0D381F320DA4E4600DFACBF /* ESCSaveToH264FileTool.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		F0D381D920DA46E200DFACBF /* ESCCameraH264Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ESCCameraH264Demo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F0D381DC20DA46E200DFACBF /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		F0D381DD20DA46E200DFACBF /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		F0D381DF20DA46E200DFACBF /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		F0D381E020DA46E200DFACBF /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		F0D381E320DA46E200DFACBF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		F0D381E520DA46F100DFACBF /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F0D381E820DA46F100DFACBF /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		F0D381EA20DA46F100DFACBF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F0D381EB20DA46F100DFACBF /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		F0D381F220DA4E4600DFACBF /* ESCSaveToH264FileTool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESCSaveToH264FileTool.h; sourceTree = "<group>"; };
+		F0D381F320DA4E4600DFACBF /* ESCSaveToH264FileTool.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESCSaveToH264FileTool.m; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		F0D381D620DA46E200DFACBF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		F0D381D020DA46E100DFACBF = {
+			isa = PBXGroup;
+			children = (
+				F0D381DB20DA46E200DFACBF /* ESCCameraH264Demo */,
+				F0D381DA20DA46E200DFACBF /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F0D381DA20DA46E200DFACBF /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F0D381D920DA46E200DFACBF /* ESCCameraH264Demo.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F0D381DB20DA46E200DFACBF /* ESCCameraH264Demo */ = {
+			isa = PBXGroup;
+			children = (
+				F0D381DC20DA46E200DFACBF /* AppDelegate.h */,
+				F0D381DD20DA46E200DFACBF /* AppDelegate.m */,
+				F0D381DF20DA46E200DFACBF /* ViewController.h */,
+				F0D381E020DA46E200DFACBF /* ViewController.m */,
+				F0D381F220DA4E4600DFACBF /* ESCSaveToH264FileTool.h */,
+				F0D381F320DA4E4600DFACBF /* ESCSaveToH264FileTool.m */,
+				F0D381E220DA46E200DFACBF /* Main.storyboard */,
+				F0D381E520DA46F100DFACBF /* Assets.xcassets */,
+				F0D381E720DA46F100DFACBF /* LaunchScreen.storyboard */,
+				F0D381EA20DA46F100DFACBF /* Info.plist */,
+				F0D381EB20DA46F100DFACBF /* main.m */,
+			);
+			path = ESCCameraH264Demo;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		F0D381D820DA46E200DFACBF /* ESCCameraH264Demo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F0D381EF20DA46F100DFACBF /* Build configuration list for PBXNativeTarget "ESCCameraH264Demo" */;
+			buildPhases = (
+				F0D381D520DA46E200DFACBF /* Sources */,
+				F0D381D620DA46E200DFACBF /* Frameworks */,
+				F0D381D720DA46E200DFACBF /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ESCCameraH264Demo;
+			productName = ESCCameraH264Demo;
+			productReference = F0D381D920DA46E200DFACBF /* ESCCameraH264Demo.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F0D381D120DA46E100DFACBF /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0940;
+				ORGANIZATIONNAME = xiang;
+				TargetAttributes = {
+					F0D381D820DA46E200DFACBF = {
+						CreatedOnToolsVersion = 9.4;
+					};
+				};
+			};
+			buildConfigurationList = F0D381D420DA46E100DFACBF /* Build configuration list for PBXProject "ESCCameraH264Demo" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = F0D381D020DA46E100DFACBF;
+			productRefGroup = F0D381DA20DA46E200DFACBF /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F0D381D820DA46E200DFACBF /* ESCCameraH264Demo */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F0D381D720DA46E200DFACBF /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F0D381E920DA46F100DFACBF /* LaunchScreen.storyboard in Resources */,
+				F0D381E620DA46F100DFACBF /* Assets.xcassets in Resources */,
+				F0D381E420DA46E200DFACBF /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F0D381D520DA46E200DFACBF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F0D381E120DA46E200DFACBF /* ViewController.m in Sources */,
+				F0D381F420DA4E4600DFACBF /* ESCSaveToH264FileTool.m in Sources */,
+				F0D381EC20DA46F100DFACBF /* main.m in Sources */,
+				F0D381DE20DA46E200DFACBF /* AppDelegate.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		F0D381E220DA46E200DFACBF /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F0D381E320DA46E200DFACBF /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		F0D381E720DA46F100DFACBF /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F0D381E820DA46F100DFACBF /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		F0D381ED20DA46F100DFACBF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		F0D381EE20DA46F100DFACBF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		F0D381F020DA46F100DFACBF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = NZ6KCMA9HH;
+				INFOPLIST_FILE = ESCCameraH264Demo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.group.anni.ESCCameraH264Demo;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F0D381F120DA46F100DFACBF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = NZ6KCMA9HH;
+				INFOPLIST_FILE = ESCCameraH264Demo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.group.anni.ESCCameraH264Demo;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F0D381D420DA46E100DFACBF /* Build configuration list for PBXProject "ESCCameraH264Demo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F0D381ED20DA46F100DFACBF /* Debug */,
+				F0D381EE20DA46F100DFACBF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F0D381EF20DA46F100DFACBF /* Build configuration list for PBXNativeTarget "ESCCameraH264Demo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F0D381F020DA46F100DFACBF /* Debug */,
+				F0D381F120DA46F100DFACBF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F0D381D120DA46E100DFACBF /* Project object */;
+}
