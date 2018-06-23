@@ -22,32 +22,44 @@
 
 @property(nonatomic,assign)NSInteger frameRate;
 
+@property(nonatomic,assign)BOOL initComplete;
+
+@property(nonatomic,strong)dispatch_queue_t recordQueue;
+
 @end
 
 @implementation ESCSaveToH264FileTool
 
 - (void)startRecordWithWidth:(NSInteger)width height:(NSInteger)height frameRate:(NSInteger)frameRate{
     if (self.filePath) {
-        [[NSFileManager defaultManager] removeItemAtPath:self.filePath error:nil];
-        [[NSFileManager defaultManager] createFileAtPath:self.filePath contents:nil attributes:nil];
-        self.fileHandle = [NSFileHandle fileHandleForWritingAtPath:self.filePath];
-        self.width = width;
-        self.height = height;
-        self.frameRate = frameRate;
-        [self initVideoToolBox];
+        self.recordQueue = dispatch_queue_create("recordQueue", DISPATCH_QUEUE_SERIAL);
+        dispatch_sync(self.recordQueue, ^{
+            [[NSFileManager defaultManager] removeItemAtPath:self.filePath error:nil];
+            [[NSFileManager defaultManager] createFileAtPath:self.filePath contents:nil attributes:nil];
+            self.fileHandle = [NSFileHandle fileHandleForWritingAtPath:self.filePath];
+            self.width = width;
+            self.height = height;
+            self.frameRate = frameRate;
+            [self initVideoToolBox];
+        });
     }
 }
 
 - (void)addFrame:(CMSampleBufferRef)sampleBufferRef {
-    if (self.fileHandle) {
-        [self encode:sampleBufferRef];
-    }
+    dispatch_sync(self.recordQueue, ^{
+        if (self.fileHandle && self.initComplete == YES) {
+            [self encode:sampleBufferRef];
+        }
+    });
 }
 
 - (void)stopRecord {
-    if (self.fileHandle) {
-        [self.fileHandle closeFile];
-    }
+    dispatch_sync(self.recordQueue, ^{
+        if (self.fileHandle) {
+            [self.fileHandle closeFile];
+            [self EndVideoToolBox];
+        }
+    });
 }
 
 
@@ -55,60 +67,63 @@
 - (void)initVideoToolBox {
     
     self.frameID = 0;
-    dispatch_sync(dispatch_get_global_queue(0, 0), ^{
-        
-        int width = (int)self.width;
-        int height = (int)self.height;
-        OSStatus status = VTCompressionSessionCreate(NULL,
-                                                     width,
-                                                     height,
-                                                     kCMVideoCodecType_H264,
-                                                     NULL,
-                                                     NULL,
-                                                     NULL,
-                                                     didCompressH264,
-                                                     (__bridge void *)(self),
-                                                     &self->_EncodingSession
-                                                     );
-        
-        NSLog(@"H264: VTCompressionSessionCreate %d", (int)status);
-        if (status != 0)
-        {
-            NSLog(@"H264: Unable to create a H264 session");
-            self.EncodingSession = NULL;
-            return ;
-        }
-        
-        // 设置实时编码输出（避免延迟）
-        VTSessionSetProperty(self->_EncodingSession, kVTCompressionPropertyKey_RealTime, kCFBooleanTrue);
-        // h264 profile, 直播一般使用baseline，可减少由于b帧带来的延时
-        VTSessionSetProperty(self->_EncodingSession, kVTCompressionPropertyKey_ProfileLevel, kVTProfileLevel_H264_Baseline_AutoLevel);
-        
-        // 设置关键帧（GOPsize)间隔
-        int frameInterval = self.frameRate / 2;
-        CFNumberRef  frameIntervalRef = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &frameInterval);
-        VTSessionSetProperty(self->_EncodingSession, kVTCompressionPropertyKey_MaxKeyFrameInterval, frameIntervalRef);
-        
-        // 设置期望帧率
-        int fps = self.frameRate;
-        CFNumberRef fpsRef = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &fps);
-        VTSessionSetProperty(self->_EncodingSession, kVTCompressionPropertyKey_ExpectedFrameRate, fpsRef);
-        
-        
-        // 设置编码码率(比特率)，如果不设置，默认将会以很低的码率编码，导致编码出来的视频很模糊
-        // 设置码率，上限，单位是bps
-        int bitRate = width * height * 3 * 4 * 8;
-        CFNumberRef bitRateRef = CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &bitRate);
-        VTSessionSetProperty(self->_EncodingSession, kVTCompressionPropertyKey_AverageBitRate, bitRateRef);
-        // 设置码率，均值，单位是byte
-        int bitRateLimit = width * height * 3 * 4;
-        CFNumberRef bitRateLimitRef = CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &bitRateLimit);
-        VTSessionSetProperty(self->_EncodingSession, kVTCompressionPropertyKey_DataRateLimits, bitRateLimitRef);
-        
-        // Tell the encoder to start encoding
-        VTCompressionSessionPrepareToEncodeFrames(self->_EncodingSession);
-        
-    });
+    
+    int width = (int)self.width;
+    int height = (int)self.height;
+    OSStatus status = VTCompressionSessionCreate(NULL,
+                                                 width,
+                                                 height,
+                                                 kCMVideoCodecType_H264,
+                                                 NULL,
+                                                 NULL,
+                                                 NULL,
+                                                 didCompressH264,
+                                                 (__bridge void *)(self),
+                                                 &self->_EncodingSession
+                                                 );
+    
+    NSLog(@"H264: VTCompressionSessionCreate %d", (int)status);
+    if (status != 0)
+    {
+        NSLog(@"H264: Unable to create a H264 session");
+        self.EncodingSession = NULL;
+        return ;
+    }
+    
+    // 设置实时编码输出（避免延迟）
+    VTSessionSetProperty(self->_EncodingSession, kVTCompressionPropertyKey_RealTime, kCFBooleanTrue);
+    // h264 profile, 直播一般使用baseline，可减少由于b帧带来的延时
+    VTSessionSetProperty(self->_EncodingSession, kVTCompressionPropertyKey_ProfileLevel, kVTProfileLevel_H264_Baseline_AutoLevel);
+    
+    // 设置关键帧（GOPsize)间隔
+    int frameInterval = (int)(self.frameRate / 2);
+    CFNumberRef  frameIntervalRef = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &frameInterval);
+    VTSessionSetProperty(self->_EncodingSession, kVTCompressionPropertyKey_MaxKeyFrameInterval, frameIntervalRef);
+    
+    // 设置期望帧率
+    int fps = (int)self.frameRate;
+    CFNumberRef fpsRef = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &fps);
+    VTSessionSetProperty(self->_EncodingSession, kVTCompressionPropertyKey_ExpectedFrameRate, fpsRef);
+    
+    
+    // 设置编码码率(比特率)，如果不设置，默认将会以很低的码率编码，导致编码出来的视频很模糊
+    // 设置码率，上限，单位是bps
+    int bitRate = width * height * 3 * 4 * 8;
+    CFNumberRef bitRateRef = CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &bitRate);
+    VTSessionSetProperty(self->_EncodingSession, kVTCompressionPropertyKey_AverageBitRate, bitRateRef);
+    // 设置码率，均值，单位是byte
+    int bitRateLimit = width * height * 3 * 4;
+    CFNumberRef bitRateLimitRef = CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &bitRateLimit);
+    VTSessionSetProperty(self->_EncodingSession, kVTCompressionPropertyKey_DataRateLimits, bitRateLimitRef);
+    
+    // Tell the encoder to start encoding
+    status = VTCompressionSessionPrepareToEncodeFrames(self->_EncodingSession);
+    if (status == 0) {
+        self.initComplete = YES;
+    }else {
+        NSLog(@"init compression session prepare to encode frames failure");
+    }
+    
 }
 
 - (void)encode:(CMSampleBufferRef)sampleBuffer {
@@ -122,8 +137,8 @@
                                                           kCMTimeInvalid,
                                                           NULL, NULL, &flags);
     if (statusCode != noErr) {
-        NSLog(@"H264: VTCompressionSessionEncodeFrame failed with %d", (int)statusCode);
         if(_EncodingSession != NULL) {
+            NSLog(@"H264: VTCompressionSessionEncodeFrame failed with %d", (int)statusCode);
             VTCompressionSessionInvalidate(_EncodingSession);
             CFRelease(_EncodingSession);
             _EncodingSession = NULL;
@@ -157,13 +172,13 @@
     }
 }
 
-- (void)EndVideoToolBox
-{
+- (void)EndVideoToolBox {
     VTCompressionSessionCompleteFrames(_EncodingSession, kCMTimeInvalid);
     VTCompressionSessionInvalidate(_EncodingSession);
     CFRelease(_EncodingSession);
     _EncodingSession = NULL;
 }
+
 void didCompressH264(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStatus status, VTEncodeInfoFlags infoFlags, CMSampleBufferRef sampleBuffer) {
 //    NSLog(@"didCompressH264 called with status %d infoFlags %d", (int)status, (int)infoFlags);
     if (status != 0) {

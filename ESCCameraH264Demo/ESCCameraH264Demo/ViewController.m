@@ -43,6 +43,7 @@
         [self.recordToH264Button setTitle:@"start record video to H264" forState:UIControlStateNormal];
         [self.captureSession stopRunning];
         [self.h264Tool stopRecord];
+        NSLog(@"结束");
     }else {
         [self.recordToH264Button setTitle:@"stop record video to H264" forState:UIControlStateNormal];
         [self.captureSession startRunning];
@@ -52,6 +53,7 @@
         filePath = [NSString stringWithFormat:@"%@/%@.h264",filePath,[self.dateFormatter stringFromDate:[NSDate date]]];
         self.h264Tool.filePath = filePath;
         [self.h264Tool startRecordWithWidth:1280 height:720 frameRate:25];
+        NSLog(@"开始");
     }
     self.isRecording = !self.isRecording;
 }
@@ -94,7 +96,7 @@
 
 #pragma mark - AVCaptureVideoDataOutputSampleBufferDelegate
 - (void)captureOutput:(AVCaptureOutput *)output didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection {
-//    NSLog(@"did get %@",output);
+    NSLog(@"did get %@",output);
     [self.h264Tool addFrame:sampleBuffer];
 }
 
