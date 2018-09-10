@@ -105,6 +105,8 @@
     CFNumberRef fpsRef = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &fps);
     VTSessionSetProperty(self->_EncodingSession, kVTCompressionPropertyKey_ExpectedFrameRate, fpsRef);
     
+    //不产生B帧
+    VTSessionSetProperty(self->_EncodingSession, kVTCompressionPropertyKey_AllowFrameReordering, kCFBooleanFalse);
     
     // 设置编码码率(比特率)，如果不设置，默认将会以很低的码率编码，导致编码出来的视频很模糊
     // 设置码率，上限，单位是bps
