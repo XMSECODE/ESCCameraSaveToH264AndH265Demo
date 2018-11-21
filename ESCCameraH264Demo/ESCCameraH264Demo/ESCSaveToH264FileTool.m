@@ -70,6 +70,7 @@
     
     int width = (int)self.width;
     int height = (int)self.height;
+    //创建编码会话对象
     OSStatus status = VTCompressionSessionCreate(NULL,
                                                  width,
                                                  height,
@@ -83,13 +84,11 @@
                                                  );
     
     NSLog(@"H264: VTCompressionSessionCreate %d", (int)status);
-    if (status != 0)
-    {
+    if (status != 0) {
         NSLog(@"H264: Unable to create a H264 session");
         self.EncodingSession = NULL;
         return ;
     }
-    
     // 设置实时编码输出（避免延迟）
     VTSessionSetProperty(self->_EncodingSession, kVTCompressionPropertyKey_RealTime, kCFBooleanTrue);
     // h264 profile, 直播一般使用baseline，可减少由于b帧带来的延时
@@ -124,8 +123,7 @@
         self.initComplete = YES;
     }else {
         NSLog(@"init compression session prepare to encode frames failure");
-    }
-    
+    } 
 }
 
 - (void)encode:(CMSampleBufferRef)sampleBuffer {
