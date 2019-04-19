@@ -150,9 +150,10 @@
 }
 
 - (void)gotSpsPps:(NSData *)sps pps:(NSData *)pps {
-//    NSLog(@"gotSpsPps %d %d", (int)[sps length], (int)[pps length]);
+    NSLog(@"gotSpsPps %d %d", (int)[sps length], (int)[pps length]);
     const char bytes[] = "\x00\x00\x00\x01";
     NSData *ByteHeader = [NSData dataWithBytes:bytes length:4];
+    NSLog(@"%@==%@",sps,pps);
     [self.fileHandle writeData:ByteHeader];
     [self.fileHandle writeData:sps];
     [self.fileHandle writeData:ByteHeader];
