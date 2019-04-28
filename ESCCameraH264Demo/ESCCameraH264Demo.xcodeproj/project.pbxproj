@@ -14,6 +14,7 @@
 		F0D381E920DA46F100DFACBF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F0D381E720DA46F100DFACBF /* LaunchScreen.storyboard */; };
 		F0D381EC20DA46F100DFACBF /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F0D381EB20DA46F100DFACBF /* main.m */; };
 		F0D381F420DA4E4600DFACBF /* ESCSaveToH264FileTool.m in Sources */ = {isa = PBXBuildFile; fileRef = F0D381F320DA4E4600DFACBF /* ESCSaveToH264FileTool.m */; };
+		F0F9B5582275876000977158 /* ESCVideoToolboxYUVToH264EncoderTool.m in Sources */ = {isa = PBXBuildFile; fileRef = F0F9B5572275876000977158 /* ESCVideoToolboxYUVToH264EncoderTool.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -29,6 +30,8 @@
 		F0D381EB20DA46F100DFACBF /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		F0D381F220DA4E4600DFACBF /* ESCSaveToH264FileTool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESCSaveToH264FileTool.h; sourceTree = "<group>"; };
 		F0D381F320DA4E4600DFACBF /* ESCSaveToH264FileTool.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESCSaveToH264FileTool.m; sourceTree = "<group>"; };
+		F0F9B5562275876000977158 /* ESCVideoToolboxYUVToH264EncoderTool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESCVideoToolboxYUVToH264EncoderTool.h; sourceTree = "<group>"; };
+		F0F9B5572275876000977158 /* ESCVideoToolboxYUVToH264EncoderTool.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESCVideoToolboxYUVToH264EncoderTool.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,6 +70,8 @@
 				F0D381E020DA46E200DFACBF /* ViewController.m */,
 				F0D381F220DA4E4600DFACBF /* ESCSaveToH264FileTool.h */,
 				F0D381F320DA4E4600DFACBF /* ESCSaveToH264FileTool.m */,
+				F0F9B5562275876000977158 /* ESCVideoToolboxYUVToH264EncoderTool.h */,
+				F0F9B5572275876000977158 /* ESCVideoToolboxYUVToH264EncoderTool.m */,
 				F0D381E220DA46E200DFACBF /* Main.storyboard */,
 				F0D381E520DA46F100DFACBF /* Assets.xcassets */,
 				F0D381E720DA46F100DFACBF /* LaunchScreen.storyboard */,
@@ -150,6 +155,7 @@
 				F0D381F420DA4E4600DFACBF /* ESCSaveToH264FileTool.m in Sources */,
 				F0D381EC20DA46F100DFACBF /* main.m in Sources */,
 				F0D381DE20DA46E200DFACBF /* AppDelegate.m in Sources */,
+				F0F9B5582275876000977158 /* ESCVideoToolboxYUVToH264EncoderTool.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

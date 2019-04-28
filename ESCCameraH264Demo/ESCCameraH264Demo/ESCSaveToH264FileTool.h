@@ -13,14 +13,28 @@
 
 @property(nonatomic,copy)NSString* filePath;
 
-- (void)startRecordWithWidth:(NSInteger)width height:(NSInteger)height frameRate:(NSInteger)frameRate;
+/**
+ yuv文件转h264压缩文件
+ */
++ (void)yuvToH264EncoderWithVideoWidth:(NSInteger)width
+                                height:(NSInteger)height
+                           yuvFilePath:(NSString *)yuvFilePath
+                          h264FilePath:(NSString *)h264FilePath
+                             frameRate:(NSInteger)frameRate;
 
-- (void)addFrame:(CMSampleBufferRef)sampleBufferRef;
+/**
+ yuv流转h264压缩文件
+ */
+- (void)setupVideoWidth:(NSInteger)width
+                 height:(NSInteger)height
+              frameRate:(NSInteger)frameRate
+           h264FilePath:(NSString *)h264FilePath;
+
+/**
+ 填充需要压缩的yuv流数据
+ */
+- (void)encoderYUVData:(NSData *)yuvData;
 
 - (void)stopRecord;
-
-+ (NSData *)readDataFromSampleBufferRef:(CMSampleBufferRef)sampleBufferRef;
-
-+ (NSData *)readDataFromBlockBuffer:(CMBlockBufferRef)dataBuffer;
 
 @end
