@@ -7,8 +7,11 @@
 //
 
 #import "ESCSaveToH264FileTool.h"
+#import "ESCVideoToolboxYUVToH264EncoderTool.h"
 
-@interface ESCSaveToH264FileTool ()
+@interface ESCSaveToH264FileTool () <ESCVideoToolboxYUVToH264EncoderToolDelegate>
+
+@property(nonatomic,strong)ESCVideoToolboxYUVToH264EncoderTool* yuvToH264EncoderTool;
 
 @property(nonatomic,strong)NSFileHandle* fileHandle;
 
@@ -30,7 +33,26 @@
 
 @implementation ESCSaveToH264FileTool
 
-- (void)startRecordWithWidth:(NSInteger)width height:(NSInteger)height frameRate:(NSInteger)frameRate{
+
+/**
+ yuv文件转h264压缩文件
+ */
++ (void)yuvToH264EncoderWithVideoWidth:(NSInteger)width
+                                height:(NSInteger)height
+                           yuvFilePath:(NSString *)yuvFilePath
+                          h264FilePath:(NSString *)h264FilePath
+                             frameRate:(NSInteger)frameRate {
+    
+}
+
+/**
+ yuv流转h264压缩文件
+ */
+- (void)setupVideoWidth:(NSInteger)width
+                 height:(NSInteger)height
+              frameRate:(NSInteger)frameRate
+           h264FilePath:(NSString *)h264FilePath {
+    self.filePath = h264FilePath;
     if (self.filePath) {
         self.recordQueue = dispatch_queue_create("recordQueue", DISPATCH_QUEUE_SERIAL);
         dispatch_sync(self.recordQueue, ^{
@@ -40,207 +62,53 @@
             self.width = width;
             self.height = height;
             self.frameRate = frameRate;
-            [self initVideoToolBox];
+            ESCVideoToolboxYUVToH264EncoderTool *tool = [[ESCVideoToolboxYUVToH264EncoderTool alloc] init];
+            self.yuvToH264EncoderTool = tool;
+            [self.yuvToH264EncoderTool setupVideoWidth:width height:height frameRate:frameRate delegate:self];
         });
     }
 }
 
-- (void)addFrame:(CMSampleBufferRef)sampleBufferRef {
-    dispatch_sync(self.recordQueue, ^{
-        if (self.fileHandle && self.initComplete == YES) {
-            [self encode:sampleBufferRef];
-        }
-    });
+/**
+ 填充需要压缩的yuv流数据
+ */
+- (void)encoderYUVData:(NSData *)yuvData {
+    [self.yuvToH264EncoderTool encoderYUVData:yuvData];
 }
 
 - (void)stopRecord {
+    [self.yuvToH264EncoderTool endYUVDataStream];
+}
+
+#pragma mark - ESCVideoToolboxYUVToH264EncoderToolDelegate
+- (void)encoder:(ESCVideoToolboxYUVToH264EncoderTool *)encoder h264Data:(void *)h264Data dataLenth:(NSInteger)lenth {
+    NSData *h264data = [NSData dataWithBytes:h264Data length:lenth];
+//    NSLog(@"接收到数据");
+    [self.fileHandle writeData:h264data];
+}
+
+- (void)encoderEnd:(ESCVideoToolboxYUVToH264EncoderTool *)encoder {
     dispatch_sync(self.recordQueue, ^{
         if (self.fileHandle) {
             [self.fileHandle closeFile];
-            [self EndVideoToolBox];
         }
     });
 }
 
-
-
-- (void)initVideoToolBox {
-    
-    self.frameID = 0;
-    
-    int width = (int)self.width;
-    int height = (int)self.height;
-    //创建编码会话对象
-    OSStatus status = VTCompressionSessionCreate(NULL,
-                                                 width,
-                                                 height,
-                                                 kCMVideoCodecType_H264,
-                                                 NULL,
-                                                 NULL,
-                                                 NULL,
-                                                 didCompressH264,
-                                                 (__bridge void *)(self),
-                                                 &self->_EncodingSession
-                                                 );
-    
-    NSLog(@"H264: VTCompressionSessionCreate %d", (int)status);
-    if (status != 0) {
-        NSLog(@"H264: Unable to create a H264 session");
-        self.EncodingSession = NULL;
-        return ;
-    }
-    // 设置实时编码输出（避免延迟）
-    VTSessionSetProperty(self->_EncodingSession, kVTCompressionPropertyKey_RealTime, kCFBooleanTrue);
-    // h264 profile, 直播一般使用baseline，可减少由于b帧带来的延时
-    VTSessionSetProperty(self->_EncodingSession, kVTCompressionPropertyKey_ProfileLevel, kVTProfileLevel_H264_Baseline_AutoLevel);
-    
-    // 设置关键帧（GOPsize)间隔
-    int frameInterval = (int)(self.frameRate / 2);
-    CFNumberRef  frameIntervalRef = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &frameInterval);
-    VTSessionSetProperty(self->_EncodingSession, kVTCompressionPropertyKey_MaxKeyFrameInterval, frameIntervalRef);
-    
-    // 设置期望帧率
-    int fps = (int)self.frameRate;
-    CFNumberRef fpsRef = CFNumberCreate(kCFAllocatorDefault, kCFNumberIntType, &fps);
-    VTSessionSetProperty(self->_EncodingSession, kVTCompressionPropertyKey_ExpectedFrameRate, fpsRef);
-    
-    //不产生B帧
-    VTSessionSetProperty(self->_EncodingSession, kVTCompressionPropertyKey_AllowFrameReordering, kCFBooleanFalse);
-    
-    // 设置编码码率(比特率)，如果不设置，默认将会以很低的码率编码，导致编码出来的视频很模糊
-    // 设置码率，上限，单位是bps
-    int bitRate = width * height * 3 * 4 * 8;
-    CFNumberRef bitRateRef = CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &bitRate);
-    VTSessionSetProperty(self->_EncodingSession, kVTCompressionPropertyKey_AverageBitRate, bitRateRef);
-    // 设置码率，均值，单位是byte
-    int bitRateLimit = width * height * 3 * 4;
-    CFNumberRef bitRateLimitRef = CFNumberCreate(kCFAllocatorDefault, kCFNumberSInt32Type, &bitRateLimit);
-    VTSessionSetProperty(self->_EncodingSession, kVTCompressionPropertyKey_DataRateLimits, bitRateLimitRef);
-    
-    // Tell the encoder to start encoding
-    status = VTCompressionSessionPrepareToEncodeFrames(self->_EncodingSession);
-    if (status == 0) {
-        self.initComplete = YES;
-    }else {
-        NSLog(@"init compression session prepare to encode frames failure");
-    } 
++ (NSData *)readDataFromSampleBufferRef:(CMSampleBufferRef)sampleBufferRef {
+    CMBlockBufferRef dataBuffer = CMSampleBufferGetDataBuffer(sampleBufferRef);
+    return [self readDataFromBlockBuffer:dataBuffer];
 }
 
-- (void)encode:(CMSampleBufferRef)sampleBuffer {
-    CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
-    // 帧时间，如果不设置会导致时间轴过长。
-    CMTime presentationTimeStamp = CMTimeMake(self.frameID++, 1000);
-    VTEncodeInfoFlags flags;
-    OSStatus statusCode = VTCompressionSessionEncodeFrame(_EncodingSession,
-                                                          imageBuffer,
-                                                          presentationTimeStamp,
-                                                          kCMTimeInvalid,
-                                                          NULL, NULL, &flags);
-    if (statusCode != noErr) {
-        if(_EncodingSession != NULL) {
-            NSLog(@"H264: VTCompressionSessionEncodeFrame failed with %d", (int)statusCode);
-            VTCompressionSessionInvalidate(_EncodingSession);
-            CFRelease(_EncodingSession);
-            _EncodingSession = NULL;
-            NSLog(@"encodingSession release");
-            return;
-        }
-    }
-//    NSLog(@"H264: VTCompressionSessionEncodeFrame Success");
-}
-
-- (void)gotSpsPps:(NSData *)sps pps:(NSData *)pps {
-    NSLog(@"gotSpsPps %d %d", (int)[sps length], (int)[pps length]);
-    const char bytes[] = "\x00\x00\x00\x01";
-    NSData *ByteHeader = [NSData dataWithBytes:bytes length:4];
-    NSLog(@"%@==%@",sps,pps);
-    [self.fileHandle writeData:ByteHeader];
-    [self.fileHandle writeData:sps];
-    [self.fileHandle writeData:ByteHeader];
-    [self.fileHandle writeData:pps];
-    
-}
-
-- (void)gotEncodedData:(NSData*)data isKeyFrame:(BOOL)isKeyFrame {
-//    NSLog(@"gotEncodedData %d", (int)[data length]);
-    if (self.fileHandle != NULL)
-    {
-        const char bytes[] = "\x00\x00\x00\x01";
-        size_t length = (sizeof bytes) - 1; //string literals have implicit trailing '\0'
-        NSData *ByteHeader = [NSData dataWithBytes:bytes length:length];
-        [self.fileHandle writeData:ByteHeader];
-        [self.fileHandle writeData:data];
-    }
-}
-
-- (void)EndVideoToolBox {
-    VTCompressionSessionCompleteFrames(_EncodingSession, kCMTimeInvalid);
-    VTCompressionSessionInvalidate(_EncodingSession);
-    CFRelease(_EncodingSession);
-    _EncodingSession = NULL;
-}
-
-void didCompressH264(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStatus status, VTEncodeInfoFlags infoFlags, CMSampleBufferRef sampleBuffer) {
-//    NSLog(@"didCompressH264 called with status %d infoFlags %d", (int)status, (int)infoFlags);
-    if (status != 0) {
-        return;
-    }
-    
-    if (!CMSampleBufferDataIsReady(sampleBuffer)) {
-        NSLog(@"didCompressH264 data is not ready ");
-        return;
-    }
-    ESCSaveToH264FileTool* encoder = (__bridge ESCSaveToH264FileTool *)outputCallbackRefCon;
-    
-    bool keyframe = !CFDictionaryContainsKey( (CFArrayGetValueAtIndex(CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, true), 0)), kCMSampleAttachmentKey_NotSync);
-    // 判断当前帧是否为关键帧
-    // 获取sps & pps数据
-    if (keyframe) {
-        CMFormatDescriptionRef format = CMSampleBufferGetFormatDescription(sampleBuffer);
-        size_t spsSize, spsCount;
-        const uint8_t *sparameterSet;
-        OSStatus statusCode = CMVideoFormatDescriptionGetH264ParameterSetAtIndex(format, 0, &sparameterSet, &spsSize, &spsCount, 0 );
-        if (statusCode == noErr) {
-            // Found sps and now check for pps
-            size_t ppsSize, ppsCount;
-            const uint8_t *pparameterSet;
-            OSStatus statusCode = CMVideoFormatDescriptionGetH264ParameterSetAtIndex(format, 1, &pparameterSet, &ppsSize, &ppsCount, 0 );
-            if (statusCode == noErr) {
-                // Found pps
-                NSData *sps = [NSData dataWithBytes:sparameterSet length:spsSize];
-                NSData *pps = [NSData dataWithBytes:pparameterSet length:ppsSize];
-                if (encoder) {
-                    [encoder gotSpsPps:sps pps:pps];
-                }
-            }
-        }
-    }
-    
-    CMBlockBufferRef dataBuffer = CMSampleBufferGetDataBuffer(sampleBuffer);
++ (NSData *)readDataFromBlockBuffer:(CMBlockBufferRef)dataBuffer {
     size_t length, totalLength;
     char *dataPointer;
     OSStatus statusCodeRet = CMBlockBufferGetDataPointer(dataBuffer, 0, &length, &totalLength, &dataPointer);
     if (statusCodeRet == noErr) {
-        size_t bufferOffset = 0;
-        static const int AVCCHeaderLength = 4; // 返回的nalu数据前四个字节不是0001的startcode，而是大端模式的帧长度length
-        
-        // 循环获取nalu数据
-        while (bufferOffset < totalLength - AVCCHeaderLength) {
-            uint32_t NALUnitLength = 0;
-            // Read the NAL unit length
-            memcpy(&NALUnitLength, dataPointer + bufferOffset, AVCCHeaderLength);
-            
-            // 从大端转系统端
-            NALUnitLength = CFSwapInt32BigToHost(NALUnitLength);
-            
-            NSData* data = [[NSData alloc] initWithBytes:(dataPointer + bufferOffset + AVCCHeaderLength) length:NALUnitLength];
-            [encoder gotEncodedData:data isKeyFrame:keyframe];
-            
-            // Move to the next NAL unit in the block buffer
-            bufferOffset += AVCCHeaderLength + NALUnitLength;
-        }
+        NSData* data = [[NSData alloc] initWithBytes:dataPointer length:totalLength];
+        return data;
     }
+    return nil;
 }
-
 
 @end

@@ -27,12 +27,27 @@
 
 @property(nonatomic,strong)NSDateFormatter* dateFormatter;
 
+@property(nonatomic,strong)NSFileHandle* temFileHandle;
+
+@property(nonatomic,assign)int yuvFrameCount;
+
 @end
 
 @implementation ViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    NSString *filePath = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask , YES).lastObject;
+    filePath = [NSString stringWithFormat:@"%@/tem1280_720.yuv",filePath];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath] == NO) {
+    }else {
+        [[NSFileManager defaultManager] removeItemAtPath:filePath error:nil];
+    }
+    [[NSFileManager defaultManager] createFileAtPath:filePath contents:nil attributes:nil];
+    
+//    NSFileHandle *fileHandle = [NSFileHandle fileHandleForWritingAtPath:filePath];
+//    self.temFileHandle = fileHandle;
     
     [self initCapureSession];
 
@@ -51,8 +66,8 @@
         self.h264Tool = [[ESCSaveToH264FileTool alloc] init];
         NSString *filePath = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).lastObject;
         filePath = [NSString stringWithFormat:@"%@/%@.h264",filePath,[self.dateFormatter stringFromDate:[NSDate date]]];
-        self.h264Tool.filePath = filePath;
-        [self.h264Tool startRecordWithWidth:1280 height:720 frameRate:25];
+        [self.h264Tool setupVideoWidth:1280 height:720 frameRate:25 h264FilePath:filePath];
+        
         NSLog(@"开始");
     }
     self.isRecording = !self.isRecording;
@@ -73,6 +88,14 @@
     //创建功能会话对象
     self.captureSession = [[AVCaptureSession alloc] init];
     //设置会话输出的视频分辨率
+    /*
+     AVCaptureSessionPreset1920x1080
+     AVCaptureSessionPreset1280x720
+     AVCaptureSessionPreset960x540
+     iphone 6处理1080p的视频性能不足
+     iphone 6s可以处理1080p视频
+     */
+    
     [self.captureSession setSessionPreset:AVCaptureSessionPreset1280x720];
     
     //添加输入端
@@ -106,13 +129,60 @@
 
 #pragma mark - AVCaptureVideoDataOutputSampleBufferDelegate
 - (void)captureOutput:(AVCaptureOutput *)output didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection {
-    NSLog(@"did get %@",output);
-    [self.h264Tool addFrame:sampleBuffer];
+    NSData *yuvData = [self getYUV420DataWithPixelBuffer:sampleBuffer];
+    if (self.h264Tool && self.isRecording) {
+        [self.h264Tool encoderYUVData:yuvData];
+    }
+}
+
+- (NSData *)getYUV420DataWithPixelBuffer:(CMSampleBufferRef)sampleBuffer {
+    CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+    CVPixelBufferLockBaseAddress(imageBuffer, kCVPixelBufferLock_ReadOnly);
+    void *y_data = CVPixelBufferGetBaseAddressOfPlane(imageBuffer, 0);
+    void *uv_data = CVPixelBufferGetBaseAddressOfPlane(imageBuffer, 1);
+    
+    size_t width = CVPixelBufferGetWidth(imageBuffer);
+    size_t height = CVPixelBufferGetHeight(imageBuffer);
+    
+    //420v 数据分布
+    /*
+     struct CVPlanarPixelBufferInfo_YCbCrBiPlanar {
+     CVPlanarComponentInfo  componentInfoY;
+     CVPlanarComponentInfo  componentInfoCbCr;
+     };
+     */
+    NSData *ydata = [NSData dataWithBytes:y_data length:width * height];
+    NSMutableData *uData = [NSMutableData data];
+    NSMutableData *vData = [NSMutableData data];
+    for (int i = 0; i < width * height / 2; i++) {
+        [uData appendBytes:(uv_data + i) length:1];
+        i++;
+        [vData appendBytes:(uv_data + i) length:1];
+    }
+    
+    NSMutableData *yuvData = [NSMutableData data];
+    [yuvData appendData:ydata];
+    [yuvData appendData:uData];
+    [yuvData appendData:vData];
+    
+    if (self.yuvFrameCount <= 200) {
+        [self.temFileHandle writeData:ydata];
+        [self.temFileHandle writeData:uData];
+        [self.temFileHandle writeData:vData];
+        self.yuvFrameCount++;
+    }else {
+        [self.temFileHandle closeFile];
+        self.temFileHandle = nil;
+    }
+    CVPixelBufferUnlockBaseAddress(imageBuffer, kCVPixelBufferLock_ReadOnly);
+    
+    return yuvData;
 }
 
 - (void)captureOutput:(AVCaptureOutput *)output didDropSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection NS_AVAILABLE(10_7, 6_0) {
     NSLog(@"did drop %@",output);
 }
+
 
 #pragma mark - getter
 - (NSDateFormatter *)dateFormatter {
