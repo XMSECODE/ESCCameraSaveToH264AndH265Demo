@@ -83,7 +83,7 @@
 #pragma mark - ESCVideoToolboxYUVToH264EncoderToolDelegate
 - (void)encoder:(ESCVideoToolboxYUVToH264EncoderTool *)encoder h264Data:(void *)h264Data dataLenth:(NSInteger)lenth {
     NSData *h264data = [NSData dataWithBytes:h264Data length:lenth];
-    NSLog(@"接收到数据");
+//    NSLog(@"接收到数据");
     [self.fileHandle writeData:h264data];
 }
 

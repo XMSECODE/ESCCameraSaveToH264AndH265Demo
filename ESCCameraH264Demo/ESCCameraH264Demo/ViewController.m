@@ -88,6 +88,14 @@
     //创建功能会话对象
     self.captureSession = [[AVCaptureSession alloc] init];
     //设置会话输出的视频分辨率
+    /*
+     AVCaptureSessionPreset1920x1080
+     AVCaptureSessionPreset1280x720
+     AVCaptureSessionPreset960x540
+     iphone 6处理1080p的视频性能不足
+     iphone 6s可以处理1080p视频
+     */
+    
     [self.captureSession setSessionPreset:AVCaptureSessionPreset1280x720];
     
     //添加输入端
