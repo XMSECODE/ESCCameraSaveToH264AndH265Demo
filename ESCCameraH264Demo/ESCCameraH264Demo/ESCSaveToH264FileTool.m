@@ -215,31 +215,41 @@ void didCompressH264(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStat
         }
     }
     
-    CMBlockBufferRef dataBuffer = CMSampleBufferGetDataBuffer(sampleBuffer);
-    size_t length, totalLength;
-    char *dataPointer;
-    OSStatus statusCodeRet = CMBlockBufferGetDataPointer(dataBuffer, 0, &length, &totalLength, &dataPointer);
-    if (statusCodeRet == noErr) {
+    //读取数据
+    NSData *resultData = [ESCSaveToH264FileTool readDataFromSampleBufferRef:sampleBuffer];
+    if (resultData != nil) {
         size_t bufferOffset = 0;
         static const int AVCCHeaderLength = 4; // 返回的nalu数据前四个字节不是0001的startcode，而是大端模式的帧长度length
-        
         // 循环获取nalu数据
-        while (bufferOffset < totalLength - AVCCHeaderLength) {
+        while (bufferOffset < resultData.length - AVCCHeaderLength) {
             uint32_t NALUnitLength = 0;
-            // Read the NAL unit length
-            memcpy(&NALUnitLength, dataPointer + bufferOffset, AVCCHeaderLength);
+            [resultData getBytes:&NALUnitLength range:NSMakeRange(bufferOffset, AVCCHeaderLength)];
             
             // 从大端转系统端
             NALUnitLength = CFSwapInt32BigToHost(NALUnitLength);
-            
-            NSData* data = [[NSData alloc] initWithBytes:(dataPointer + bufferOffset + AVCCHeaderLength) length:NALUnitLength];
-            [encoder gotEncodedData:data isKeyFrame:keyframe];
-            
+            NSData *getData = [resultData subdataWithRange:NSMakeRange(AVCCHeaderLength + bufferOffset, NALUnitLength)];
+            [encoder gotEncodedData:getData isKeyFrame:keyframe];
+//            NSLog(@"%lu",(unsigned long)getData.length);
             // Move to the next NAL unit in the block buffer
             bufferOffset += AVCCHeaderLength + NALUnitLength;
         }
     }
 }
 
++ (NSData *)readDataFromSampleBufferRef:(CMSampleBufferRef)sampleBufferRef {
+    CMBlockBufferRef dataBuffer = CMSampleBufferGetDataBuffer(sampleBufferRef);
+    return [self readDataFromBlockBuffer:dataBuffer];
+}
+
++ (NSData *)readDataFromBlockBuffer:(CMBlockBufferRef)dataBuffer {
+    size_t length, totalLength;
+    char *dataPointer;
+    OSStatus statusCodeRet = CMBlockBufferGetDataPointer(dataBuffer, 0, &length, &totalLength, &dataPointer);
+    if (statusCodeRet == noErr) {
+        NSData* data = [[NSData alloc] initWithBytes:dataPointer length:totalLength];
+        return data;
+    }
+    return nil;
+}
 
 @end

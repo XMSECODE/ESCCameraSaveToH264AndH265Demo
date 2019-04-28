@@ -27,6 +27,10 @@
 
 @property(nonatomic,strong)NSDateFormatter* dateFormatter;
 
+@property(nonatomic,strong)NSFileHandle* temFileHandle;
+
+@property(nonatomic,assign)int yuvFrameCount;
+
 @end
 
 @implementation ViewController
@@ -34,6 +38,15 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    NSString *filePath = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask , YES).lastObject;
+    filePath = [NSString stringWithFormat:@"%@/tem1280_720.yuv",filePath];
+    if ([[NSFileManager defaultManager] fileExistsAtPath:filePath] == NO) {
+    }else {
+        [[NSFileManager defaultManager] removeItemAtPath:filePath error:nil];
+    }
+    [[NSFileManager defaultManager] createFileAtPath:filePath contents:nil attributes:nil];
+    NSFileHandle *fileHandle = [NSFileHandle fileHandleForWritingAtPath:filePath];
+    self.temFileHandle = fileHandle;
     [self initCapureSession];
 
 }
@@ -106,8 +119,46 @@
 
 #pragma mark - AVCaptureVideoDataOutputSampleBufferDelegate
 - (void)captureOutput:(AVCaptureOutput *)output didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection {
+//    [self getYUV420DataWithPixelBuffer:sampleBuffer];
     NSLog(@"did get %@",output);
     [self.h264Tool addFrame:sampleBuffer];
+}
+
+- (void)getYUV420DataWithPixelBuffer:(CMSampleBufferRef)sampleBuffer {
+    CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+    CVPixelBufferLockBaseAddress(imageBuffer, kCVPixelBufferLock_ReadOnly);
+    void *y_data = CVPixelBufferGetBaseAddressOfPlane(imageBuffer, 0);
+    void *uv_data = CVPixelBufferGetBaseAddressOfPlane(imageBuffer, 1);
+    
+    size_t width = CVPixelBufferGetWidth(imageBuffer);
+    size_t height = CVPixelBufferGetHeight(imageBuffer);
+    
+    //420v 数据分布
+    /*
+     struct CVPlanarPixelBufferInfo_YCbCrBiPlanar {
+     CVPlanarComponentInfo  componentInfoY;
+     CVPlanarComponentInfo  componentInfoCbCr;
+     };
+     */
+    NSData *ydata = [NSData dataWithBytes:y_data length:width * height];
+    NSMutableData *uData = [NSMutableData data];
+    NSMutableData *vData = [NSMutableData data];
+    for (int i = 0; i < width * height / 2; i++) {
+        [uData appendBytes:(uv_data + i) length:1];
+        i++;
+        [vData appendBytes:(uv_data + i) length:1];
+    }
+    if (self.yuvFrameCount <= 200) {
+        [self.temFileHandle writeData:ydata];
+        [self.temFileHandle writeData:uData];
+        [self.temFileHandle writeData:vData];
+        self.yuvFrameCount++;
+        NSLog(@"写入yuv数据完成");
+    }else {
+        [self.temFileHandle closeFile];
+        self.temFileHandle = nil;
+    }
+    CVPixelBufferUnlockBaseAddress(imageBuffer, kCVPixelBufferLock_ReadOnly);
 }
 
 - (void)captureOutput:(AVCaptureOutput *)output didDropSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection NS_AVAILABLE(10_7, 6_0) {

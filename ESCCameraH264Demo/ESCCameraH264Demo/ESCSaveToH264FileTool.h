@@ -19,4 +19,8 @@
 
 - (void)stopRecord;
 
++ (NSData *)readDataFromSampleBufferRef:(CMSampleBufferRef)sampleBufferRef;
+
++ (NSData *)readDataFromBlockBuffer:(CMBlockBufferRef)dataBuffer;
+
 @end
