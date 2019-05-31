@@ -1,15 +1,15 @@
 //
-//  ESCVideoToolboxEncodeH264DataTool.m
+//  ESCVideoToolboxYUVToH265EncoderTool.m
 //  ESCCameraH264Demo
 //
-//  Created by xiang on 2019/4/28.
+//  Created by xiang on 5/31/19.
 //  Copyright © 2019 xiang. All rights reserved.
 //
 
-#import "ESCVideoToolboxYUVToH264EncoderTool.h"
+#import "ESCVideoToolboxYUVToH265EncoderTool.h"
 #import <VideoToolbox/VideoToolbox.h>
 
-@interface ESCVideoToolboxYUVToH264EncoderTool ()
+@interface ESCVideoToolboxYUVToH265EncoderTool ()
 
 @property(nonatomic,assign)NSInteger frameID;
 
@@ -29,9 +29,11 @@
 
 @property(nonatomic,strong)NSData* ppsData;
 
+@property(nonatomic,strong)NSData* vpsData;
+
 @end
 
-@implementation ESCVideoToolboxYUVToH264EncoderTool
+@implementation ESCVideoToolboxYUVToH265EncoderTool
 
 - (instancetype)init {
     self = [super init];
@@ -47,7 +49,7 @@
 - (void)setupVideoWidth:(NSInteger)width
                  height:(NSInteger)height
               frameRate:(NSInteger)frameRate
-               delegate:(id<ESCVideoToolboxYUVToH264EncoderToolDelegate>)delegate {
+               delegate:(id<ESCVideoToolboxYUVToH265EncoderToolDelegate>)delegate {
     self.delegate = delegate;
     self.recordQueue = dispatch_queue_create("recordQueue", DISPATCH_QUEUE_SERIAL);
     dispatch_sync(self.recordQueue, ^{
@@ -69,25 +71,27 @@
     OSStatus status = VTCompressionSessionCreate(NULL,
                                                  width,
                                                  height,
-                                                 kCMVideoCodecType_H264,
+                                                 kCMVideoCodecType_HEVC,
                                                  NULL,
                                                  NULL,
                                                  NULL,
-                                                 didCompressToH264,
+                                                 didCompressToH265,
                                                  (__bridge void *)(self),
                                                  &self->_EncodingSession
                                                  );
     
-    NSLog(@"H264: VTCompressionSessionCreate %d", (int)status);
+    NSLog(@"H265: VTCompressionSessionCreate %d", (int)status);
     if (status != 0) {
-        NSLog(@"H264: Unable to create a H264 session");
+        NSLog(@"H265: Unable to create a H265 session");
         self.EncodingSession = NULL;
         return ;
     }
     // 设置实时编码输出（避免延迟）
     VTSessionSetProperty(self->_EncodingSession, kVTCompressionPropertyKey_RealTime, kCFBooleanTrue);
     // h264 profile, 直播一般使用baseline，可减少由于b帧带来的延时
-    VTSessionSetProperty(self->_EncodingSession, kVTCompressionPropertyKey_ProfileLevel, kVTProfileLevel_H264_Baseline_AutoLevel);
+    if (@available(iOS 11.0, *)) {
+        VTSessionSetProperty(self->_EncodingSession, kVTCompressionPropertyKey_ProfileLevel, kVTProfileLevel_HEVC_Main_AutoLevel);
+    }
     
     // 设置关键帧（GOPsize)间隔
     int frameInterval = (int)(self.frameRate / 2);
@@ -121,70 +125,77 @@
     }
 }
 
-- (void)gotSpsPps:(NSData *)sps pps:(NSData *)pps {
+- (void)gotSpsPps:(NSData *)sps pps:(NSData *)pps vps:(NSData *)vps{
     const uint8_t bytes[] = {0x00,0x00,0x00,0x01};
     NSData *ByteHeader = [NSData dataWithBytes:bytes length:4];
     NSMutableData *ppsData = [NSMutableData dataWithData:ByteHeader];
     [ppsData appendData:pps];
     NSMutableData *spsData = [NSMutableData dataWithData:ByteHeader];
     [spsData appendData:sps];
+    NSMutableData *vpsData = [NSMutableData dataWithData:ByteHeader];
+    [vpsData appendData:vps];
     self.spsData = spsData;
     self.ppsData = ppsData;
+    self.vpsData = vpsData;
 }
 
 - (void)gotEncodedData:(NSData*)data isKeyFrame:(BOOL)isKeyFrame {
     if (isKeyFrame == YES) {
         if (self.spsAndPpsIsIncludedInIframe == YES) {
-            if (self.delegate && [self.delegate respondsToSelector:@selector(encoder:h264Data:dataLenth:)]) {
+            if (self.delegate && [self.delegate respondsToSelector:@selector(encoder:h265Data:dataLenth:)]) {
                 uint8_t index = 0;
-                uint8_t *h264data = malloc(data.length + 4 + self.spsData.length + self.ppsData.length);
+                unsigned long length = data.length + 4 + self.vpsData.length + self.spsData.length + self.ppsData.length;
+                uint8_t *h265data = malloc(length);
+                
+                uint8_t *vpsPoint = (uint8_t *)[self.vpsData bytes];
+                memcpy(h265data + index, vpsPoint, self.vpsData.length);
+                index += self.vpsData.length;
                 
                 uint8_t *ppsPoint = (uint8_t *)[self.ppsData bytes];
-                memcpy(h264data + index, ppsPoint, self.ppsData.length);
+                memcpy(h265data + index, ppsPoint, self.ppsData.length);
                 index += self.ppsData.length;
                 
                 uint8_t *spsPoint = (uint8_t *)[self.spsData bytes];
-                memcpy(h264data + index, spsPoint, self.spsData.length);
+                memcpy(h265data + index, spsPoint, self.spsData.length);
                 index += self.spsData.length;
                 
                 const uint8_t bytes[] = {0x00,0x00,0x00,0x01};
-                memcpy(h264data + index, bytes, 4);
+                memcpy(h265data + index, bytes, 4);
                 index += 4;
                 
-                uint8_t *h264Point = (uint8_t *)[data bytes];
-                memcpy(h264data + index, h264Point, data.length);
-                
-                [self.delegate encoder:self h264Data:h264data dataLenth:data.length + 4 + self.spsData.length + self.ppsData.length];
-                free(h264data);
+                uint8_t *h265Point = (uint8_t *)[data bytes];
+                memcpy(h265data + index, h265Point, data.length);
+                [self.delegate encoder:self h265Data:h265data dataLenth:data.length + 4 + self.spsData.length + self.ppsData.length];
+                free(h265data);
             }
         }else {
-            if (self.delegate && [self.delegate respondsToSelector:@selector(encoder:h264Data:dataLenth:)]) {
+            if (self.delegate && [self.delegate respondsToSelector:@selector(encoder:h265Data:dataLenth:)]) {
                 if (self.ppsData) {
                     uint8_t *ppsPoint = (uint8_t *)[self.ppsData bytes];
-                    [self.delegate encoder:self h264Data:ppsPoint dataLenth:self.ppsData.length];
+                    [self.delegate encoder:self h265Data:ppsPoint dataLenth:self.ppsData.length];
                 }
                 if (self.spsData) {
                     uint8_t *spsPoint = (uint8_t *)[self.spsData bytes];
-                    [self.delegate encoder:self h264Data:spsPoint dataLenth:self.spsData.length];
+                    [self.delegate encoder:self h265Data:spsPoint dataLenth:self.spsData.length];
                 }
-                uint8_t *h264data = malloc(data.length + 4);
+                uint8_t *h265data = malloc(data.length + 4);
                 const uint8_t bytes[] = {0x00,0x00,0x00,0x01};
-                memcpy(h264data, bytes, 4);
+                memcpy(h265data, bytes, 4);
                 uint8_t *h264Point = (uint8_t *)[data bytes];
-                memcpy(h264data + 4, h264Point, data.length);
-                [self.delegate encoder:self h264Data:h264data dataLenth:data.length + 4];
-                free(h264data);
+                memcpy(h265data + 4, h264Point, data.length);
+                [self.delegate encoder:self h265Data:h265data dataLenth:data.length + 4];
+                free(h265data);
             }
         }
     }else {
-        if (self.delegate && [self.delegate respondsToSelector:@selector(encoder:h264Data:dataLenth:)]) {
-            uint8_t *h264data = malloc(data.length + 4);
+        if (self.delegate && [self.delegate respondsToSelector:@selector(encoder:h265Data:dataLenth:)]) {
+            uint8_t *h265data = malloc(data.length + 4);
             const uint8_t bytes[] = {0x00,0x00,0x00,0x01};
-            memcpy(h264data, bytes, 4);
+            memcpy(h265data, bytes, 4);
             uint8_t *h264Point = (uint8_t *)[data bytes];
-            memcpy(h264data + 4, h264Point, data.length);
-            [self.delegate encoder:self h264Data:h264data dataLenth:data.length + 4];
-            free(h264data);
+            memcpy(h265data + 4, h264Point, data.length);
+            [self.delegate encoder:self h265Data:h265data dataLenth:data.length + 4];
+            free(h265data);
         }
     }
 }
@@ -205,44 +216,56 @@
     return nil;
 }
 
-void didCompressToH264(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStatus status, VTEncodeInfoFlags infoFlags, CMSampleBufferRef sampleBuffer) {
+void didCompressToH265(void *outputCallbackRefCon, void *sourceFrameRefCon, OSStatus status, VTEncodeInfoFlags infoFlags, CMSampleBufferRef sampleBuffer) {
     //    NSLog(@"didCompressH264 called with status %d infoFlags %d", (int)status, (int)infoFlags);
     if (status != 0) {
         return;
     }
     
     if (!CMSampleBufferDataIsReady(sampleBuffer)) {
-        NSLog(@"didCompressH264 data is not ready ");
+        NSLog(@"didCompressH265 data is not ready ");
         return;
     }
-    ESCVideoToolboxYUVToH264EncoderTool* encoder = (__bridge ESCVideoToolboxYUVToH264EncoderTool *)outputCallbackRefCon;
+    ESCVideoToolboxYUVToH265EncoderTool* encoder = (__bridge ESCVideoToolboxYUVToH265EncoderTool *)outputCallbackRefCon;
     
     bool keyframe = !CFDictionaryContainsKey( (CFArrayGetValueAtIndex(CMSampleBufferGetSampleAttachmentsArray(sampleBuffer, true), 0)), kCMSampleAttachmentKey_NotSync);
     // 判断当前帧是否为关键帧
     // 获取sps & pps数据
     if (keyframe) {
         CMFormatDescriptionRef format = CMSampleBufferGetFormatDescription(sampleBuffer);
-        size_t spsSize, spsCount;
-        const uint8_t *sparameterSet;
-        OSStatus statusCode = CMVideoFormatDescriptionGetH264ParameterSetAtIndex(format, 0, &sparameterSet, &spsSize, &spsCount, 0 );
-        if (statusCode == noErr) {
-            // Found sps and now check for pps
-            size_t ppsSize, ppsCount;
-            const uint8_t *pparameterSet;
-            OSStatus statusCode = CMVideoFormatDescriptionGetH264ParameterSetAtIndex(format, 1, &pparameterSet, &ppsSize, &ppsCount, 0 );
+        
+        size_t vpsSize,vpsCount;
+        const uint8_t *vpsSet;
+        if (@available(iOS 11.0, *)) {
+            OSStatus statusCode = CMVideoFormatDescriptionGetHEVCParameterSetAtIndex(format, 0, &vpsSet, &vpsSize, &vpsCount, 0);
             if (statusCode == noErr) {
-                // Found pps
-                NSData *sps = [NSData dataWithBytes:sparameterSet length:spsSize];
-                NSData *pps = [NSData dataWithBytes:pparameterSet length:ppsSize];
-                if (encoder) {
-                    [encoder gotSpsPps:sps pps:pps];
+                // Found sps and now check for pps
+                size_t ppsSize, ppsCount;
+                const uint8_t *pparameterSet;
+                OSStatus statusCode = CMVideoFormatDescriptionGetHEVCParameterSetAtIndex(format, 1, &pparameterSet, &ppsSize, &ppsCount, 0);
+                if (statusCode == noErr) {
+                    size_t spsSize, spsCount;
+                    const uint8_t *sparameterSet;
+                    OSStatus statusCode = CMVideoFormatDescriptionGetHEVCParameterSetAtIndex(format, 2, &sparameterSet, &spsSize, &spsCount, 0);
+                    if (statusCode == noErr) {
+                        // Found pps
+                        NSData *sps = [NSData dataWithBytes:sparameterSet length:spsSize];
+                        NSData *pps = [NSData dataWithBytes:pparameterSet length:ppsSize];
+                        NSData *vps = [NSData dataWithBytes:vpsSet length:vpsSize];
+                        if (encoder) {
+                            [encoder gotSpsPps:sps pps:pps vps:vps];
+                        }
+                    }
+                    
                 }
             }
+        } else {
+            // Fallback on earlier versions
         }
     }
     
     //读取数据
-    NSData *resultData = [ESCVideoToolboxYUVToH264EncoderTool readDataFromSampleBufferRef:sampleBuffer];
+    NSData *resultData = [ESCVideoToolboxYUVToH265EncoderTool readDataFromSampleBufferRef:sampleBuffer];
     if (resultData != nil) {
         size_t bufferOffset = 0;
         static const int AVCCHeaderLength = 4; // 返回的nalu数据前四个字节不是0001的startcode，而是大端模式的帧长度length
@@ -279,7 +302,7 @@ void didCompressToH264(void *outputCallbackRefCon, void *sourceFrameRefCon, OSSt
 - (void)encoderYUVData:(NSData *)yuvData {
     dispatch_sync(self.recordQueue, ^{
         if (self.initComplete == YES) {
-//            [self encode:sampleBufferRef];
+            //            [self encode:sampleBufferRef];
             CVPixelBufferRef pixeBuffer;
             CVReturn result = CVPixelBufferCreate(NULL, self.width, self.height, kCVPixelFormatType_420YpCbCr8Planar, NULL, &pixeBuffer);
             if (result == kCVReturnSuccess) {
@@ -312,7 +335,7 @@ void didCompressToH264(void *outputCallbackRefCon, void *sourceFrameRefCon, OSSt
     CVPixelBufferRelease(imageBuffer);
     if (statusCode != noErr) {
         if(_EncodingSession != NULL) {
-            NSLog(@"H264: VTCompressionSessionEncodeFrame failed with %d", (int)statusCode);
+            NSLog(@"H265: VTCompressionSessionEncodeFrame failed with %d", (int)statusCode);
             VTCompressionSessionInvalidate(_EncodingSession);
             CFRelease(_EncodingSession);
             _EncodingSession = NULL;

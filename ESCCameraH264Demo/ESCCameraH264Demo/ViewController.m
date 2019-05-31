@@ -10,6 +10,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import <VideoToolbox/VideoToolbox.h>
 #import "ESCSaveToH264FileTool.h"
+#import "ESCSaveToH265FileTool.h"
 
 @interface ViewController () <AVCaptureVideoDataOutputSampleBufferDelegate>
 
@@ -24,6 +25,8 @@
 @property(nonatomic,strong)dispatch_queue_t videoDataOutputQueue;
 
 @property(nonatomic,strong)ESCSaveToH264FileTool* h264Tool;
+
+@property(nonatomic,strong)ESCSaveToH265FileTool* h265Tool;
 
 @property(nonatomic,strong)NSDateFormatter* dateFormatter;
 
@@ -58,6 +61,7 @@
         [self.recordToH264Button setTitle:@"start record video to H264" forState:UIControlStateNormal];
         [self.captureSession stopRunning];
         [self.h264Tool stopRecord];
+        [self.h265Tool stopRecord];
         NSLog(@"结束");
     }else {
         [self.recordToH264Button setTitle:@"stop record video to H264" forState:UIControlStateNormal];
@@ -65,9 +69,12 @@
         
         self.h264Tool = [[ESCSaveToH264FileTool alloc] init];
         NSString *filePath = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).lastObject;
-        filePath = [NSString stringWithFormat:@"%@/%@.h264",filePath,[self.dateFormatter stringFromDate:[NSDate date]]];
-        [self.h264Tool setupVideoWidth:1280 height:720 frameRate:25 h264FilePath:filePath];
+        NSString *h264FilePath = [NSString stringWithFormat:@"%@/%@.h264",filePath,[self.dateFormatter stringFromDate:[NSDate date]]];
+        [self.h264Tool setupVideoWidth:1280 height:720 frameRate:25 h264FilePath:h264FilePath];
         
+        self.h265Tool = [[ESCSaveToH265FileTool alloc] init];
+        NSString *h265FilePath = [NSString stringWithFormat:@"%@/%@.h265",filePath,[self.dateFormatter stringFromDate:[NSDate date]]];
+        [self.h265Tool setupVideoWidth:1280 height:720 frameRate:25 h265FilePath:h265FilePath];
         NSLog(@"开始");
     }
     self.isRecording = !self.isRecording;
@@ -132,6 +139,7 @@
     NSData *yuvData = [self getYUV420DataWithPixelBuffer:sampleBuffer];
     if (self.h264Tool && self.isRecording) {
         [self.h264Tool encoderYUVData:yuvData];
+        [self.h265Tool encoderYUVData:yuvData];
     }
 }
 

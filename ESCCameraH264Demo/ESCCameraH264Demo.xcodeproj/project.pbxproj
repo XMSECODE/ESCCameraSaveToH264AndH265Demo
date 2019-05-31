@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F013CE3F22A0B8330003E8A3 /* ESCVideoToolboxYUVToH265EncoderTool.m in Sources */ = {isa = PBXBuildFile; fileRef = F013CE3E22A0B8330003E8A3 /* ESCVideoToolboxYUVToH265EncoderTool.m */; };
+		F013CE4222A0BB3D0003E8A3 /* ESCSaveToH265FileTool.m in Sources */ = {isa = PBXBuildFile; fileRef = F013CE4122A0BB3D0003E8A3 /* ESCSaveToH265FileTool.m */; };
 		F0D381DE20DA46E200DFACBF /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F0D381DD20DA46E200DFACBF /* AppDelegate.m */; };
 		F0D381E120DA46E200DFACBF /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F0D381E020DA46E200DFACBF /* ViewController.m */; };
 		F0D381E420DA46E200DFACBF /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F0D381E220DA46E200DFACBF /* Main.storyboard */; };
@@ -18,6 +20,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F013CE3D22A0B8330003E8A3 /* ESCVideoToolboxYUVToH265EncoderTool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESCVideoToolboxYUVToH265EncoderTool.h; sourceTree = "<group>"; };
+		F013CE3E22A0B8330003E8A3 /* ESCVideoToolboxYUVToH265EncoderTool.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESCVideoToolboxYUVToH265EncoderTool.m; sourceTree = "<group>"; };
+		F013CE4022A0BB3D0003E8A3 /* ESCSaveToH265FileTool.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ESCSaveToH265FileTool.h; sourceTree = "<group>"; };
+		F013CE4122A0BB3D0003E8A3 /* ESCSaveToH265FileTool.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ESCSaveToH265FileTool.m; sourceTree = "<group>"; };
 		F0D381D920DA46E200DFACBF /* ESCCameraH264Demo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ESCCameraH264Demo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F0D381DC20DA46E200DFACBF /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		F0D381DD20DA46E200DFACBF /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -72,6 +78,10 @@
 				F0D381F320DA4E4600DFACBF /* ESCSaveToH264FileTool.m */,
 				F0F9B5562275876000977158 /* ESCVideoToolboxYUVToH264EncoderTool.h */,
 				F0F9B5572275876000977158 /* ESCVideoToolboxYUVToH264EncoderTool.m */,
+				F013CE4022A0BB3D0003E8A3 /* ESCSaveToH265FileTool.h */,
+				F013CE4122A0BB3D0003E8A3 /* ESCSaveToH265FileTool.m */,
+				F013CE3D22A0B8330003E8A3 /* ESCVideoToolboxYUVToH265EncoderTool.h */,
+				F013CE3E22A0B8330003E8A3 /* ESCVideoToolboxYUVToH265EncoderTool.m */,
 				F0D381E220DA46E200DFACBF /* Main.storyboard */,
 				F0D381E520DA46F100DFACBF /* Assets.xcassets */,
 				F0D381E720DA46F100DFACBF /* LaunchScreen.storyboard */,
@@ -152,8 +162,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				F0D381E120DA46E200DFACBF /* ViewController.m in Sources */,
+				F013CE4222A0BB3D0003E8A3 /* ESCSaveToH265FileTool.m in Sources */,
 				F0D381F420DA4E4600DFACBF /* ESCSaveToH264FileTool.m in Sources */,
 				F0D381EC20DA46F100DFACBF /* main.m in Sources */,
+				F013CE3F22A0B8330003E8A3 /* ESCVideoToolboxYUVToH265EncoderTool.m in Sources */,
 				F0D381DE20DA46E200DFACBF /* AppDelegate.m in Sources */,
 				F0F9B5582275876000977158 /* ESCVideoToolboxYUVToH264EncoderTool.m in Sources */,
 			);
@@ -296,7 +308,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 4SF28MHQDQ;
+				DEVELOPMENT_TEAM = NZ6KCMA9HH;
 				INFOPLIST_FILE = ESCCameraH264Demo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -314,7 +326,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 4SF28MHQDQ;
+				DEVELOPMENT_TEAM = NZ6KCMA9HH;
 				INFOPLIST_FILE = ESCCameraH264Demo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = (
